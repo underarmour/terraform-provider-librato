@@ -1,4 +1,5 @@
-
+Example:
+```
 provider "librato" {
   user = "pbeam%40underarmour.com"
   token = "e9d083aac74151d4ae23fa4a009921ee9a64686b7dc3412076ded9a3552a4521"
@@ -27,4 +28,5 @@ resource "librato_space_chart" "chart" {
     period = 60
   }
 }
+```
 
