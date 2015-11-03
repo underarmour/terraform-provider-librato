@@ -44,11 +44,6 @@ func DoRequest(
 	}
 	log.Printf("[DEBUG] doRequest made request: %v %v", req, resp)
 
-	// check status code
-	if resp.StatusCode != expectedCode {
-		return resp.StatusCode, fmt.Errorf("doRequest unexpected status: %v %v", expectedCode, resp.StatusCode)
-	}
-
 	// read response body
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -56,12 +51,19 @@ func DoRequest(
 	}
 	log.Printf("[DEBUG] doRequest read response body: %s", respBytes)
 
-	// unmarshal response
-	err = json.Unmarshal(respBytes, respStruct)
-	if err != nil {
-		return resp.StatusCode, fmt.Errorf("doRequest failed unmarshal: %v", err)
+	// check status code
+	if resp.StatusCode != expectedCode {
+		return resp.StatusCode, fmt.Errorf("doRequest unexpected status: %v %v %s", expectedCode, resp.StatusCode, respBytes)
 	}
-	log.Printf("[DEBUG] doRequest marshal response: %#v", respStruct)
+
+	// unmarshal response
+	if respStruct != nil {
+		err = json.Unmarshal(respBytes, respStruct)
+		if err != nil {
+			return resp.StatusCode, fmt.Errorf("doRequest failed unmarshal: %v", err)
+		}
+		log.Printf("[DEBUG] doRequest marshal response: %#v", respStruct)
+	}
 
 	return resp.StatusCode, nil
 }

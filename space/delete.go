@@ -9,30 +9,23 @@ import (
 	"github.com/underarmour/terraform-provider-librato/request"
 )
 
-type readResponse struct {
-	Name string `json:"name"`
-	Id   int    `json:"id"`
-}
-
-func doRead(d *schema.ResourceData, ip interface{}) error {
-	log.Printf("[DEBUG] doRead space")
+func doDelete(d *schema.ResourceData, ip interface{}) error {
+	log.Printf("[DEBUG] doDelete space")
 
 	p := ip.(*provider.Provider)
-	resp := &readResponse{}
 
 	_, err := request.DoRequest(
-		"GET",
+		"DELETE",
 		fmt.Sprintf("/spaces/%s", d.Id()),
 		p,
 		nil,
-		resp,
-		200,
+		nil,
+		204,
 	)
 	if err != nil {
-		return fmt.Errorf("doRead space failed: %v", err)
+		return fmt.Errorf("doDelete space failed: %v", err)
 	}
 
-	log.Printf("[DEBUG] doRead space: %#v", resp)
-	d.Set("name", resp.Name)
+	log.Printf("[DEBUG] doDelete deleted space")
 	return nil
 }

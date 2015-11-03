@@ -18,8 +18,7 @@ func doCreate(d *schema.ResourceData, ip interface{}) error {
 	log.Printf("[DEBUG] doCreate new space")
 
 	p := ip.(*provider.Provider)
-	s := readSpace(d)
-	body := &createBody{Name: s.name}
+	body := &createBody{Name: d.Get("name").(string)}
 
 	resp := &readResponse{}
 	_, err := request.DoRequest("POST", "/spaces", p, body, resp, 201)
@@ -29,6 +28,5 @@ func doCreate(d *schema.ResourceData, ip interface{}) error {
 
 	log.Printf("[DEBUG] doCreate created space: %#v", resp)
 	d.SetId(strconv.Itoa(resp.Id))
-	d.Set("name", resp.Name)
 	return nil
 }

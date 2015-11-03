@@ -1,4 +1,4 @@
-package space
+package space_chart
 
 import (
 	"fmt"
@@ -10,13 +10,13 @@ import (
 )
 
 func doExists(d *schema.ResourceData, ip interface{}) (bool, error) {
-	log.Printf("[DEBUG] doExists space")
+	log.Printf("[DEBUG] doExists space_chart")
 
 	p := ip.(*provider.Provider)
 
 	statusCode, err := request.DoRequest(
 		"GET",
-		fmt.Sprintf("/spaces/%s", d.Id()),
+		fmt.Sprintf("/spaces/%s/charts/%s", d.Get("space").(string), d.Id()),
 		p,
 		nil,
 		nil,
@@ -24,13 +24,13 @@ func doExists(d *schema.ResourceData, ip interface{}) (bool, error) {
 	)
 	if err != nil {
 		if statusCode == 404 {
-			log.Printf("[DEBUG] doExists space not found")
+			log.Printf("[DEBUG] doExists space_chart not found")
 			return false, nil
 		} else {
-			return false, fmt.Errorf("doRead space failed: %v", err)
+			return false, fmt.Errorf("doExists space_chart failed: %v", err)
 		}
 	}
 
-	log.Printf("[DEBUG] doExists space exists")
+	log.Printf("[DEBUG] doExists space_chart exists")
 	return true, nil
 }
