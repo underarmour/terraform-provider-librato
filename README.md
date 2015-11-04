@@ -28,5 +28,30 @@ resource "librato_space_chart" "chart" {
     period = 60
   }
 }
+
+resource "librato_service" "identity" {
+  title = "PagerDuty Identity"
+  type = "pagerduty"
+  settings {
+    service_key = "e9d083aac74151d4ae23fa4a009921ee"
+    event_type = "trigger"
+    description = "PagerDuty Identity"
+  }
+}
+
+resource "librato_alert" "alert" {
+  name = "identity.important.alert"
+  description = "The important alert"
+  rearm_seconds = 60
+  services = ["${librato_service.identity.id}"]
+  conditions {
+    condition_type = "above"
+    metric_name = "AWS.DynamoDB.ConsumedReadCapacityUnits"
+    threshold = 1
+    source = "*"
+    summary_function = "sum"
+    duration = 60
+  }
+}
 ```
 
