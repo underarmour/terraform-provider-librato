@@ -8,43 +8,40 @@ import (
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
 
-func doDelete(
-	d *schema.ResourceData,
-	ip interface{},
-	resourceName,
-	path string,
-) error {
-	log.Printf("[DEBUG] doDelete %s", resourceName)
+func doUpdate(d *schema.ResourceData, ip interface{}, resourceName, path string, makeBody makeBodyFn) error {
+	log.Printf("[DEBUG] doUpdate %s", resourceName)
 
 	p := ip.(*provider.Provider)
+	body := makeBody(d)
 
 	_, err := DoRequest(
-		"DELETE",
+		"PUT",
 		path,
 		p,
-		nil,
+		body,
 		nil,
 		204,
 	)
 
 	if err != nil {
-		return fmt.Errorf("doDelete %s failed: %v", resourceName, err)
+		return fmt.Errorf("doUpdate %s failed: %v", resourceName, err)
 	}
 
-	log.Printf("[DEBUG] doDelete %s", resourceName)
+	log.Printf("[DEBUG] doUpdate %s", resourceName)
 	return nil
 }
 
-func DeleterFunc(
+func UpdaterFunc(
 	resourceName string,
 	path string,
 	pathFormatter pathFormatterFn,
-) schema.DeleteFunc {
+	makeBody makeBodyFn,
+) schema.UpdateFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
 		if pathFormatter != nil {
 			path = pathFormatter(path, d)
 		}
 
-		return doDelete(d, ip, resourceName, path)
+		return doUpdate(d, ip, resourceName, path, makeBody)
 	}
 }

@@ -8,43 +8,41 @@ import (
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
 
-func doDelete(
-	d *schema.ResourceData,
-	ip interface{},
-	resourceName,
-	path string,
-) error {
-	log.Printf("[DEBUG] doDelete %s", resourceName)
+func doRead(d *schema.ResourceData, ip interface{}, resourceName, path string, readBody readBodyFn) error {
+	log.Printf("[DEBUG] doRead %s", resourceName)
 
 	p := ip.(*provider.Provider)
+	var resp map[string]interface{}
 
 	_, err := DoRequest(
-		"DELETE",
+		"GET",
 		path,
 		p,
 		nil,
-		nil,
-		204,
+		&resp,
+		200,
 	)
 
 	if err != nil {
-		return fmt.Errorf("doDelete %s failed: %v", resourceName, err)
+		return fmt.Errorf("doRead %s failed: %v", resourceName, err)
 	}
 
-	log.Printf("[DEBUG] doDelete %s", resourceName)
+	log.Printf("[DEBUG] doRead %s: %#v", resourceName, resp)
+	readBody(d, resp)
 	return nil
 }
 
-func DeleterFunc(
+func ReaderFunc(
 	resourceName string,
 	path string,
 	pathFormatter pathFormatterFn,
-) schema.DeleteFunc {
+	readBody readBodyFn,
+) schema.ReadFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
 		if pathFormatter != nil {
 			path = pathFormatter(path, d)
 		}
 
-		return doDelete(d, ip, resourceName, path)
+		return doRead(d, ip, resourceName, path, readBody)
 	}
 }

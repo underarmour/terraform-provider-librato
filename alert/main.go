@@ -1,8 +1,6 @@
 package alert
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/underarmour/terraform-provider-librato/request"
 )
@@ -95,26 +93,12 @@ func NewResource() *schema.Resource {
 				Optional:    true,
 			},
 		},
-		Create: doCreate,
-		Read:   doRead,
-		Update: doUpdate,
-		Delete: doDelete,
-		Exists: doExists,
+		Create: request.CreatorFunc("alert", "/alerts", nil, makeBody),
+		Read:   request.ReaderFunc("alert", "/alerts/%s", request.IdPathFormatter, readBody),
+		Update: request.UpdaterFunc("alert", "/alerts/%s", request.IdPathFormatter, makeBody),
+		Delete: request.DeleterFunc("alert", "/alerts/%s", request.IdPathFormatter),
+		Exists: request.ExisterFunc("alert", "/alerts/%s", request.IdPathFormatter),
 	}
-}
-
-func doDelete(d *schema.ResourceData, ip interface{}) error {
-	return request.DoDelete(
-		d, ip, "alert",
-		fmt.Sprintf("/alerts/%s", d.Id()),
-	)
-}
-
-func doExists(d *schema.ResourceData, ip interface{}) (bool, error) {
-	return request.DoExists(
-		d, ip, "alert",
-		fmt.Sprintf("/alerts/%s", d.Id()),
-	)
 }
 
 func makeBody(d *schema.ResourceData) map[string]interface{} {
@@ -159,4 +143,27 @@ func makeBody(d *schema.ResourceData) map[string]interface{} {
 	body["conditions"] = conditions
 
 	return body
+}
+
+func readBody(d *schema.ResourceData, resp map[string]interface{}) {
+	d.Set("name", resp["name"])
+	d.Set("version", resp["version"])
+	d.Set("description", resp["description"])
+	d.Set("active", resp["active"])
+	d.Set("rearm_seconds", resp["rearm_seconds"])
+	d.Set("conditions", resp["conditions"])
+	d.Set("attributes", resp["attributes"])
+
+	// pull out services ids because the request body
+	// is different than the response body
+
+	services := resp["services"].([]interface{})
+	serviceIds := make([]int, 0)
+	for _, serviceI := range services {
+		service := serviceI.(map[string]interface{})
+
+		// not sure why this is introspecting as a float64
+		serviceIds = append(serviceIds, int(service["id"].(float64)))
+	}
+	d.Set("services", serviceIds)
 }

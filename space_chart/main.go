@@ -1,6 +1,11 @@
 package space_chart
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/underarmour/terraform-provider-librato/request"
+)
 
 func NewResource() *schema.Resource {
 	return &schema.Resource{
@@ -122,10 +127,120 @@ func NewResource() *schema.Resource {
 				},
 			},
 		},
-		Create: doCreate,
-		Read:   doRead,
-		Update: doUpdate,
-		Delete: doDelete,
-		Exists: doExists,
+		Create: request.CreatorFunc("space_chart", "/spaces/%s/charts", createPathFormatter, makeBody),
+		Read:   request.ReaderFunc("space_chart", "/spaces/%s/charts/%s", pathFormatter, readBody),
+		Update: request.UpdaterFunc("space_chart", "/spaces/%s/charts/%s", pathFormatter, makeBody),
+		Delete: request.DeleterFunc("space_chart", "/spaces/%s/charts/%s", pathFormatter),
+		Exists: request.ExisterFunc("space_chart", "/spaces/%s/charts/%s", pathFormatter),
 	}
+}
+
+func createPathFormatter(path string, d *schema.ResourceData) string {
+	return fmt.Sprintf(path, d.Get("space"))
+}
+
+func pathFormatter(path string, d *schema.ResourceData) string {
+	return fmt.Sprintf(path, d.Get("space"), d.Id())
+}
+
+func makeBody(d *schema.ResourceData) map[string]interface{} {
+	body := make(map[string]interface{})
+	body["name"] = d.Get("name")
+	body["type"] = d.Get("type")
+	body["label"] = d.Get("label")
+	body["related_space"] = d.Get("related_space")
+
+	// skip empty values
+
+	min := d.Get("min").(int)
+	if min != 0 {
+		body["min"] = min
+	}
+
+	max := d.Get("max").(int)
+	if max != 0 {
+		body["max"] = max
+	}
+
+	// clean stream empty values
+
+	streams := d.Get("stream").([]interface{})
+	for _, streamI := range streams {
+		stream := streamI.(map[string]interface{})
+
+		delete(stream, "id")
+
+		metric := stream["metric"].(string)
+		if metric == "" {
+			delete(stream, "metric")
+		}
+
+		source := stream["source"].(string)
+		if source == "" {
+			delete(stream, "source")
+		}
+
+		group_function := stream["group_function"].(string)
+		if group_function == "" {
+			delete(stream, "group_function")
+		}
+
+		composite := stream["composite"].(string)
+		if composite == "" {
+			delete(stream, "composite")
+		}
+
+		summary_function := stream["summary_function"].(string)
+		if summary_function == "" {
+			delete(stream, "summary_function")
+		}
+
+		color := stream["color"].(string)
+		if color == "" {
+			delete(stream, "color")
+		}
+
+		units_short := stream["units_short"].(string)
+		if units_short == "" {
+			delete(stream, "units_short")
+		}
+
+		units_long := stream["units_long"].(string)
+		if units_long == "" {
+			delete(stream, "units_long")
+		}
+
+		min := stream["min"].(int)
+		if min == 0 {
+			delete(stream, "min")
+		}
+
+		max := stream["max"].(int)
+		if max == 0 {
+			delete(stream, "max")
+		}
+
+		transform_function := stream["transform_function"].(string)
+		if transform_function == "" {
+			delete(stream, "transform_function")
+		}
+
+		period := stream["period"].(int)
+		if period == 0 {
+			delete(stream, "period")
+		}
+	}
+	body["streams"] = streams
+
+	return body
+}
+
+func readBody(d *schema.ResourceData, resp map[string]interface{}) {
+	d.Set("name", resp["name"])
+	d.Set("type", resp["type"])
+	d.Set("min", resp["min"])
+	d.Set("max", resp["max"])
+	d.Set("label", resp["label"])
+	d.Set("related_space", resp["related_space"])
+	d.Set("stream", resp["streams"])
 }

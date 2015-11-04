@@ -1,6 +1,9 @@
 package space
 
-import "github.com/hashicorp/terraform/helper/schema"
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/underarmour/terraform-provider-librato/request"
+)
 
 func NewResource() *schema.Resource {
 	return &schema.Resource{
@@ -11,10 +14,20 @@ func NewResource() *schema.Resource {
 				Required:    true,
 			},
 		},
-		Create: doCreate,
-		Read:   doRead,
-		Update: doUpdate,
-		Delete: doDelete,
-		Exists: doExists,
+		Create: request.CreatorFunc("space", "/spaces", nil, makeBody),
+		Read:   request.ReaderFunc("space", "/spaces/%s", request.IdPathFormatter, readBody),
+		Update: request.UpdaterFunc("space", "/spaces/%s", request.IdPathFormatter, makeBody),
+		Delete: request.DeleterFunc("space", "/spaces/%s", request.IdPathFormatter),
+		Exists: request.ExisterFunc("space", "/spaces/%s", request.IdPathFormatter),
 	}
+}
+
+func makeBody(d *schema.ResourceData) map[string]interface{} {
+	body := make(map[string]interface{})
+	body["name"] = d.Get("name")
+	return body
+}
+
+func readBody(d *schema.ResourceData, resp map[string]interface{}) {
+	d.Set("name", resp["name"])
 }

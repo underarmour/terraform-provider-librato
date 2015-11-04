@@ -8,8 +8,17 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
+
+type makeBodyFn func(*schema.ResourceData) map[string]interface{}
+type readBodyFn func(*schema.ResourceData, map[string]interface{})
+type pathFormatterFn func(string, *schema.ResourceData) string
+
+func IdPathFormatter(path string, d *schema.ResourceData) string {
+	return fmt.Sprintf(path, d.Id())
+}
 
 func DoRequest(
 	method, path string,
