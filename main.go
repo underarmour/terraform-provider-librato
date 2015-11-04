@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/underarmour/terraform-provider-librato/alert"
 	"github.com/underarmour/terraform-provider-librato/provider"
 	"github.com/underarmour/terraform-provider-librato/service"
 	"github.com/underarmour/terraform-provider-librato/space"
@@ -40,6 +41,7 @@ func newProvider() terraform.ResourceProvider {
 			"librato_space":       space.NewResource(),
 			"librato_space_chart": space_chart.NewResource(),
 			"librato_service":     service.NewResource(),
+			"librato_alert":       alert.NewResource(),
 		},
 		ConfigureFunc: configureFunc,
 	}

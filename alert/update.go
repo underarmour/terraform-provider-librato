@@ -1,4 +1,4 @@
-package space
+package alert
 
 import (
 	"fmt"
@@ -10,23 +10,23 @@ import (
 )
 
 func doUpdate(d *schema.ResourceData, ip interface{}) error {
-	log.Printf("[DEBUG] doUpdate space")
+	log.Printf("[DEBUG] doUpdate alert")
 
 	p := ip.(*provider.Provider)
-	body := &createBody{Name: d.Get("name").(string)}
+	body := makeBody(d)
 
 	_, err := request.DoRequest(
 		"PUT",
-		fmt.Sprintf("/spaces/%s", d.Id()),
+		fmt.Sprintf("/alerts/%s", d.Id()),
 		p,
 		body,
 		nil,
 		204,
 	)
 	if err != nil {
-		return fmt.Errorf("doUpdate space failed: %v", err)
+		return fmt.Errorf("doUpdate alert failed: %v", err)
 	}
 
-	log.Printf("[DEBUG] doUpdate space")
+	log.Printf("[DEBUG] doUpdate alert")
 	return nil
 }
