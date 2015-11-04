@@ -1,4 +1,4 @@
-package space
+package service
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 func doDelete(d *schema.ResourceData, ip interface{}) error {
 	return request.DoDelete(
-		d, ip, "space",
-		fmt.Sprintf("/spaces/%s", d.Id()),
+		d, ip, "service",
+		fmt.Sprintf("/services/%s", d.Id()),
 	)
 }

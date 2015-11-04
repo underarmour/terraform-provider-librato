@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/underarmour/terraform-provider-librato/provider"
+	"github.com/underarmour/terraform-provider-librato/service"
 	"github.com/underarmour/terraform-provider-librato/space"
 	"github.com/underarmour/terraform-provider-librato/space_chart"
 )
@@ -38,6 +39,7 @@ func newProvider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"librato_space":       space.NewResource(),
 			"librato_space_chart": space_chart.NewResource(),
+			"librato_service":     service.NewResource(),
 		},
 		ConfigureFunc: configureFunc,
 	}

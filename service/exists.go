@@ -1,4 +1,4 @@
-package space_chart
+package service
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 func doExists(d *schema.ResourceData, ip interface{}) (bool, error) {
 	return request.DoExists(
-		d, ip, "space_chart",
-		fmt.Sprintf("/spaces/%s/charts/%s", d.Get("space").(string), d.Id()),
+		d, ip, "service",
+		fmt.Sprintf("/services/%s", d.Id()),
 	)
 }
