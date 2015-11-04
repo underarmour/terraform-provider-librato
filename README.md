@@ -1,8 +1,8 @@
 Example:
 ```
 provider "librato" {
-  user = "pbeam%40underarmour.com"
-  token = "e9d083aac74151d4ae23fa4a009921ee9a64686b7dc3412076ded9a3552a4521"
+  user = "your@email.com"
+  token = "yourlibratotoken"
 }
 
 resource "librato_space" "space" {
@@ -33,7 +33,7 @@ resource "librato_service" "identity" {
   title = "PagerDuty Identity"
   type = "pagerduty"
   settings {
-    service_key = "e9d083aac74151d4ae23fa4a009921ee"
+    service_key = "yourpagerdutytoken"
     event_type = "trigger"
     description = "PagerDuty Identity"
   }
