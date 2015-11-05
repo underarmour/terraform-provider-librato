@@ -8,7 +8,12 @@ import (
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
 
-func doExists(d *schema.ResourceData, ip interface{}, resourceName, path string) (bool, error) {
+func doExists(
+	d *schema.ResourceData,
+	ip interface{},
+	resourceName,
+	path string,
+) (bool, error) {
 	log.Printf("[DEBUG] doExists %s", resourceName)
 
 	p := ip.(*provider.Provider)
@@ -40,10 +45,6 @@ func ExisterFunc(
 	pathFormatter pathFormatterFn,
 ) schema.ExistsFunc {
 	return func(d *schema.ResourceData, ip interface{}) (bool, error) {
-		if pathFormatter != nil {
-			path = pathFormatter(path, d)
-		}
-
-		return doExists(d, ip, resourceName, path)
+		return doExists(d, ip, resourceName, formatPath(path, pathFormatter, d))
 	}
 }

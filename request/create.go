@@ -17,8 +17,8 @@ func doCreate(
 	d *schema.ResourceData,
 	ip interface{},
 	resourceName string,
-	makeBody makeBodyFn,
 	path string,
+	makeBody makeBodyFn,
 ) error {
 	log.Printf("[DEBUG] doCreate new %s", resourceName)
 
@@ -51,10 +51,6 @@ func CreatorFunc(
 	makeBody makeBodyFn,
 ) schema.CreateFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
-		if pathFormatter != nil {
-			path = pathFormatter(path, d)
-		}
-
-		return doCreate(d, ip, resourceName, makeBody, path)
+		return doCreate(d, ip, resourceName, formatPath(path, pathFormatter, d), makeBody)
 	}
 }

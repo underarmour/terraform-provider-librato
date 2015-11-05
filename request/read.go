@@ -3,12 +3,19 @@ package request
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
 
-func doRead(d *schema.ResourceData, ip interface{}, resourceName, path string, readBody readBodyFn) error {
+func doRead(
+	d *schema.ResourceData,
+	ip interface{},
+	resourceName,
+	path string,
+	readBody readBodyFn,
+) error {
 	log.Printf("[DEBUG] doRead %s", resourceName)
 
 	p := ip.(*provider.Provider)
@@ -28,7 +35,18 @@ func doRead(d *schema.ResourceData, ip interface{}, resourceName, path string, r
 	}
 
 	log.Printf("[DEBUG] doRead %s: %#v", resourceName, resp)
-	readBody(d, resp)
+	errs := readBody(d, resp)
+
+	if errs != nil {
+		errstrs := make([]string, len(errs))
+		for _, err := range errs {
+			errstrs = append(errstrs, err.Error())
+		}
+
+		errstr := strings.Join(errstrs, "; ")
+		return fmt.Errorf("doRead %s readBody failed: %s", resourceName, errstr)
+	}
+
 	return nil
 }
 
@@ -39,10 +57,6 @@ func ReaderFunc(
 	readBody readBodyFn,
 ) schema.ReadFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
-		if pathFormatter != nil {
-			path = pathFormatter(path, d)
-		}
-
-		return doRead(d, ip, resourceName, path, readBody)
+		return doRead(d, ip, resourceName, formatPath(path, pathFormatter, d), readBody)
 	}
 }

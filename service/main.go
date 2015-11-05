@@ -47,8 +47,12 @@ func makeBody(d *schema.ResourceData) map[string]interface{} {
 	return body
 }
 
-func readBody(d *schema.ResourceData, resp map[string]interface{}) {
-	d.Set("type", resp["type"])
-	d.Set("title", resp["title"])
-	d.Set("settings", resp["settings"])
+func readBody(d *schema.ResourceData, resp map[string]interface{}) []error {
+	data := map[string]interface{}{
+		"type":     resp["type"],
+		"title":    resp["title"],
+		"settings": resp["settings"],
+	}
+
+	return request.SetAll(d, data)
 }

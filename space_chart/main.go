@@ -63,6 +63,11 @@ func NewResource() *schema.Resource {
 							Description: "A display name to use for the stream when generating the tooltip",
 							Required:    true,
 						},
+						"type": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "The stream type",
+							Optional:    true,
+						},
 						"metric": &schema.Schema{
 							Type:        schema.TypeString,
 							Description: "Name of metric",
@@ -235,12 +240,23 @@ func makeBody(d *schema.ResourceData) map[string]interface{} {
 	return body
 }
 
-func readBody(d *schema.ResourceData, resp map[string]interface{}) {
-	d.Set("name", resp["name"])
-	d.Set("type", resp["type"])
-	d.Set("min", resp["min"])
-	d.Set("max", resp["max"])
-	d.Set("label", resp["label"])
-	d.Set("related_space", resp["related_space"])
-	d.Set("stream", resp["streams"])
+func readBody(d *schema.ResourceData, resp map[string]interface{}) []error {
+	// if a user blanks out max in the ui it is not
+	// returned at all in the GET body
+	max := resp["max"]
+	if max == nil {
+		max = 0
+	}
+
+	data := map[string]interface{}{
+		"name":          resp["name"],
+		"type":          resp["type"],
+		"min":           resp["min"],
+		"max":           max,
+		"label":         resp["label"],
+		"related_space": resp["related_space"],
+		"stream":        resp["streams"],
+	}
+
+	return request.SetAll(d, data)
 }

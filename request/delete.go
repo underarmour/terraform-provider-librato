@@ -41,10 +41,6 @@ func DeleterFunc(
 	pathFormatter pathFormatterFn,
 ) schema.DeleteFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
-		if pathFormatter != nil {
-			path = pathFormatter(path, d)
-		}
-
-		return doDelete(d, ip, resourceName, path)
+		return doDelete(d, ip, resourceName, formatPath(path, pathFormatter, d))
 	}
 }

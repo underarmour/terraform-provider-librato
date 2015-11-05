@@ -13,8 +13,16 @@ import (
 )
 
 type makeBodyFn func(*schema.ResourceData) map[string]interface{}
-type readBodyFn func(*schema.ResourceData, map[string]interface{})
+type readBodyFn func(*schema.ResourceData, map[string]interface{}) []error
 type pathFormatterFn func(string, *schema.ResourceData) string
+
+func formatPath(path string, pathFormatter pathFormatterFn, d *schema.ResourceData) string {
+	if pathFormatter == nil {
+		return path
+	} else {
+		return pathFormatter(path, d)
+	}
+}
 
 func IdPathFormatter(path string, d *schema.ResourceData) string {
 	return fmt.Sprintf(path, d.Id())
@@ -39,6 +47,7 @@ func DoRequest(
 	}
 
 	// build request
+	log.Printf("[DEBUG] doRequest building request: %s %s", method, path)
 	req, err := prov.NewRequest(method, path, bodyReader)
 	if err != nil {
 		return -1, fmt.Errorf("doRequest failed to build request: %v %v", err, req)
@@ -75,4 +84,21 @@ func DoRequest(
 	}
 
 	return resp.StatusCode, nil
+}
+
+func SetAll(d *schema.ResourceData, data map[string]interface{}) []error {
+	errs := make([]error, 0)
+
+	for key, value := range data {
+		err := d.Set(key, value)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	} else {
+		return nil
+	}
 }

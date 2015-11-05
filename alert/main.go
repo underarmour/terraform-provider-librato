@@ -145,18 +145,9 @@ func makeBody(d *schema.ResourceData) map[string]interface{} {
 	return body
 }
 
-func readBody(d *schema.ResourceData, resp map[string]interface{}) {
-	d.Set("name", resp["name"])
-	d.Set("version", resp["version"])
-	d.Set("description", resp["description"])
-	d.Set("active", resp["active"])
-	d.Set("rearm_seconds", resp["rearm_seconds"])
-	d.Set("conditions", resp["conditions"])
-	d.Set("attributes", resp["attributes"])
-
+func readBody(d *schema.ResourceData, resp map[string]interface{}) []error {
 	// pull out services ids because the request body
 	// is different than the response body
-
 	services := resp["services"].([]interface{})
 	serviceIds := make([]int, 0)
 	for _, serviceI := range services {
@@ -165,5 +156,17 @@ func readBody(d *schema.ResourceData, resp map[string]interface{}) {
 		// not sure why this is introspecting as a float64
 		serviceIds = append(serviceIds, int(service["id"].(float64)))
 	}
-	d.Set("services", serviceIds)
+
+	data := map[string]interface{}{
+		"name":          resp["name"],
+		"version":       resp["version"],
+		"description":   resp["description"],
+		"active":        resp["active"],
+		"rearm_seconds": resp["rearm_seconds"],
+		"conditions":    resp["conditions"],
+		"attributes":    resp["attributes"],
+		"services":      serviceIds,
+	}
+
+	return request.SetAll(d, data)
 }

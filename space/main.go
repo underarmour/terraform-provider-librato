@@ -28,6 +28,10 @@ func makeBody(d *schema.ResourceData) map[string]interface{} {
 	return body
 }
 
-func readBody(d *schema.ResourceData, resp map[string]interface{}) {
-	d.Set("name", resp["name"])
+func readBody(d *schema.ResourceData, resp map[string]interface{}) []error {
+	data := map[string]interface{}{
+		"name": resp["name"],
+	}
+
+	return request.SetAll(d, data)
 }

@@ -8,7 +8,13 @@ import (
 	"github.com/underarmour/terraform-provider-librato/provider"
 )
 
-func doUpdate(d *schema.ResourceData, ip interface{}, resourceName, path string, makeBody makeBodyFn) error {
+func doUpdate(
+	d *schema.ResourceData,
+	ip interface{},
+	resourceName,
+	path string,
+	makeBody makeBodyFn,
+) error {
 	log.Printf("[DEBUG] doUpdate %s", resourceName)
 
 	p := ip.(*provider.Provider)
@@ -38,10 +44,6 @@ func UpdaterFunc(
 	makeBody makeBodyFn,
 ) schema.UpdateFunc {
 	return func(d *schema.ResourceData, ip interface{}) error {
-		if pathFormatter != nil {
-			path = pathFormatter(path, d)
-		}
-
-		return doUpdate(d, ip, resourceName, path, makeBody)
+		return doUpdate(d, ip, resourceName, formatPath(path, pathFormatter, d), makeBody)
 	}
 }
