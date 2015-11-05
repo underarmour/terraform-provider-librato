@@ -61,7 +61,7 @@ func NewResource() *schema.Resource {
 						"name": &schema.Schema{
 							Type:        schema.TypeString,
 							Description: "A display name to use for the stream when generating the tooltip",
-							Required:    true,
+							Optional:    true,
 						},
 						"type": &schema.Schema{
 							Type:        schema.TypeString,
