@@ -42,7 +42,12 @@ func NewResource() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"condition_type": &schema.Schema{
+						"id": &schema.Schema{
+							Type:        schema.TypeInt,
+							Description: "The unique id assigned by librato",
+							Computed:    true,
+						},
+						"type": &schema.Schema{
 							Type:        schema.TypeString,
 							Description: "One of above, absent, or below",
 							Required:    true,
